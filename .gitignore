@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+*.mp3
+*.wav
+*.m4a
+*.ogg
+*.webm
+.DS_Store
+Thumbs.db
