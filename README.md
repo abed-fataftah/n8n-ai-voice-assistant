@@ -12,6 +12,39 @@ An n8n workflow that receives an audio upload, transcribes it with ElevenLabs, g
 
 This is a single-turn workflow. It has no conversation memory, connected agent tools, or included browser interface.
 
+## Workflow diagram
+
+The solid arrows show the main processing path. The dotted connection supplies the AI Agent with its language model.
+
+```mermaid
+flowchart TD
+    webhook["Webhook · POST"] -->|"Binary field: audio"| transcribe["ElevenLabs · Transcribe audio or video"]
+    transcribe -->|"text"| agent["AI Agent"]
+    model["OpenAI Chat Model · GPT-5 mini"] -.->|"Language model"| agent
+    agent -->|"output"| speech["ElevenLabs · Convert text to speech"]
+    speech -->|"Generated audio"| respond["Respond to Webhook · Binary response"]
+```
+
+## Request and response
+
+The client uploads a file and waits for the generated audio in the same HTTP request. This workflow does not stream audio.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Workflow as n8n workflow
+    participant ElevenLabs
+    participant OpenAI
+    Client->>Workflow: POST multipart form-data (audio file)
+    Workflow->>ElevenLabs: Transcribe uploaded audio
+    ElevenLabs-->>Workflow: Transcript text
+    Workflow->>OpenAI: Generate reply from transcript
+    OpenAI-->>Workflow: Reply text
+    Workflow->>ElevenLabs: Convert reply to speech
+    ElevenLabs-->>Workflow: Generated audio
+    Workflow-->>Client: HTTP response with binary audio
+```
+
 ## Requirements
 
 - An n8n instance supporting the node types and versions in the workflow.
